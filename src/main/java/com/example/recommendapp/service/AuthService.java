@@ -16,6 +16,7 @@ public class AuthService {
     private final UserMapper mapper;
 
     public UserResponseDto registerUser(UserRequestDto candidate) {
+        candidateCheck(candidate);
         User user = mapper.userRequestDtoToUser(candidate);
 
         if (findUser(user.getEmail())) {
@@ -45,12 +46,27 @@ public class AuthService {
         }
     }
 
-    public boolean findUser(String email){
+    public boolean findUser(String email) {
         try {
             FirebaseAuth.getInstance().getUserByEmail(email);
             return true;
         } catch (FirebaseAuthException e) {
             return false;
+        }
+    }
+
+    private void candidateCheck(UserRequestDto candidate) {
+        if (candidate.userName().isEmpty()) {
+            throw new RuntimeException("User name cannot be empty!");
+        }
+        if (candidate.fullName().isEmpty()) {
+            throw new RuntimeException("Email cannot be empty!");
+        }
+        if (candidate.email().isEmpty()) {
+            throw new RuntimeException("Password cannot be empty!");
+        }
+        if (candidate.password().isEmpty()) {
+            throw new RuntimeException("Password cannot be empty!");
         }
     }
 }

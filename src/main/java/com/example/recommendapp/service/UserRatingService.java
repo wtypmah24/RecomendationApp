@@ -19,66 +19,19 @@ public class UserRatingService {
     private final FirebaseDatabase firebaseDatabase;
 
     public CompletableFuture<List<UserRatingResponseDto>> findAll() {
-        DatabaseReference ratingRef = firebaseDatabase.getReference("userRatings");
-        CompletableFuture<List<UserRatingResponseDto>> future = new CompletableFuture<>();
-
-        ratingRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                List<UserRatingResponseDto> ratingList = new ArrayList<>();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    UserRating userRating = snapshot.getValue(UserRating.class);
-                    if (userRating != null) {
-                        UserRatingResponseDto responseDto = mapper.toResponseDto(userRating);
-                        ratingList.add(responseDto);
-                    }
-                }
-                future.complete(ratingList);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                future.completeExceptionally(databaseError.toException());
-            }
-        });
-
-        return future;
+        return queryRatings(firebaseDatabase.getReference("userRatings"));
     }
 
     public CompletableFuture<List<UserRatingResponseDto>> getTop10() {
-        DatabaseReference ratingRef = firebaseDatabase.getReference("userRatings");
-        CompletableFuture<List<UserRatingResponseDto>> future = new CompletableFuture<>();
-
-        Query query = ratingRef.orderByChild("score").limitToLast(10);
-
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                List<UserRatingResponseDto> ratingList = new ArrayList<>();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    UserRating userRating = snapshot.getValue(UserRating.class);
-                    if (userRating != null) {
-                        UserRatingResponseDto responseDto = mapper.toResponseDto(userRating);
-                        ratingList.add(responseDto);
-                    }
-                }
-                future.complete(ratingList);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                future.completeExceptionally(databaseError.toException());
-            }
-        });
-        return future;
+        return queryRatings(firebaseDatabase.getReference("userRatings").orderByChild("score").limitToLast(10));
     }
 
     public CompletableFuture<List<UserRatingResponseDto>> getOrdered() {
-        DatabaseReference ratingRef = firebaseDatabase.getReference("userRatings");
+        return queryRatings(firebaseDatabase.getReference("userRatings").orderByChild("score"));
+    }
+
+    private CompletableFuture<List<UserRatingResponseDto>> queryRatings(Query query) {
         CompletableFuture<List<UserRatingResponseDto>> future = new CompletableFuture<>();
-
-        Query query = ratingRef.orderByChild("score");
-
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -86,8 +39,7 @@ public class UserRatingService {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     UserRating userRating = snapshot.getValue(UserRating.class);
                     if (userRating != null) {
-                        UserRatingResponseDto responseDto = mapper.toResponseDto(userRating);
-                        ratingList.add(responseDto);
+                        ratingList.add(mapper.toResponseDto(userRating));
                     }
                 }
                 future.complete(ratingList);
