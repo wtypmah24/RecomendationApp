@@ -2,7 +2,7 @@ package com.example.recommendapp.controller;
 
 import com.example.recommendapp.dto.UserRequestDto;
 import com.example.recommendapp.dto.UserResponseDto;
-import com.example.recommendapp.service.AuthService;
+import com.example.recommendapp.service.todelete.AuthService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

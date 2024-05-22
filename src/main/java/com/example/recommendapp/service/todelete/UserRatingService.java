@@ -1,4 +1,4 @@
-package com.example.recommendapp.service;
+package com.example.recommendapp.service.todelete;
 
 import com.example.recommendapp.dto.UserRatingResponseDto;
 import com.example.recommendapp.entity.UserRating;

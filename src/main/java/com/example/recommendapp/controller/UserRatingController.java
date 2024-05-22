@@ -1,7 +1,7 @@
 package com.example.recommendapp.controller;
 
 import com.example.recommendapp.dto.UserRatingResponseDto;
-import com.example.recommendapp.service.UserRatingService;
+import com.example.recommendapp.service.todelete.UserRatingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
