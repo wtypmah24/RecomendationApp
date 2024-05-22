@@ -15,13 +15,18 @@ import org.springframework.stereotype.Service;
 public class AuthService {
     private final UserMapper mapper;
 
-    public UserResponseDto registerUser(UserRequestDto candidate){
+    public UserResponseDto registerUser(UserRequestDto candidate) {
         User user = mapper.userRequestDtoToUser(candidate);
+
+        if (findUser(user.getEmail())) {
+            throw new RuntimeException("User already exists!");
+        }
+
         try {
             UserRecord.CreateRequest request = new UserRecord.CreateRequest()
                     .setEmail(user.getEmail())
                     .setPassword(user.getPassword())
-                    .setDisplayName(user.getFullName())
+                    .setDisplayName(user.getUserName())
                     .setDisabled(false);
 
             FirebaseAuth.getInstance().createUser(request);
@@ -31,12 +36,21 @@ public class AuthService {
         }
     }
 
-    public String loginUser(String email) {
+    public String getUserName(String email) {
+        try {
+            UserRecord userRecord = FirebaseAuth.getInstance().getUserByEmail(email);
+            return userRecord.getDisplayName();
+        } catch (FirebaseAuthException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public boolean findUser(String email){
         try {
             FirebaseAuth.getInstance().getUserByEmail(email);
-            return "User logged in successfully!";
+            return true;
         } catch (FirebaseAuthException e) {
-            return "Error: " + e.getMessage();
+            return false;
         }
     }
 }

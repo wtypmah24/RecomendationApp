@@ -9,8 +9,6 @@ import com.google.firebase.database.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.CompletableFuture;
-
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
@@ -24,8 +22,7 @@ public class ReviewService {
 
         DatabaseReference usersRef = firebaseDatabase.getReference("reviews");
 
-        if (!isUsernameExists(reviewRequestDto.viewedUserName()).join() ||
-                !isUsernameExists(reviewRequestDto.viewerUserName()).join()) {
+        if (!isUserExist(reviewRequestDto)) {
             throw new RuntimeException("User doesn't exist!");
         }
 
@@ -42,7 +39,7 @@ public class ReviewService {
     }
 
     private void updateScore(Review review) {
-        DatabaseReference userRatingRef = firebaseDatabase.getReference("userRatings").child(review.getViewedUserName());
+        DatabaseReference userRatingRef = firebaseDatabase.getReference("userRatings").child(getViewedUserName(review));
         userRatingRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -56,8 +53,8 @@ public class ReviewService {
                     }
                 } else {
                     UserRating newUserRating = new UserRating();
-                    newUserRating.setId(review.getViewedUserName());
-                    newUserRating.setUserName(review.getViewedUserName());
+                    newUserRating.setId(review.getViewedEmail());
+                    newUserRating.setUserName(getViewedUserName(review));
                     newUserRating.setScore(review.getScore());
                     dataSnapshot.getRef().setValueAsync(newUserRating);
                 }
@@ -65,30 +62,17 @@ public class ReviewService {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                // Handle error
                 throw new RuntimeException("Database operation cancelled: " + databaseError.getMessage());
             }
         });
     }
 
-    private CompletableFuture<Boolean> isUsernameExists(String username) {
-        DatabaseReference usersRef = firebaseDatabase.getReference("users");
-        CompletableFuture<Boolean> future = new CompletableFuture<>();
-
-        usersRef.orderByChild("userName").equalTo(username)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        future.complete(dataSnapshot.exists());
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        future.completeExceptionally(databaseError.toException());
-                    }
-                });
-
-        return future;
+    private boolean isUserExist(ReviewRequestDto requestDto) {
+        return authService.findUser(requestDto.viewerEmail()) && authService.findUser(requestDto.viewedEmail());
     }
 
+    private String getViewedUserName(Review review) {
+        String viewedEmail = review.getViewedEmail();
+        return authService.getUserName(viewedEmail);
+    }
 }

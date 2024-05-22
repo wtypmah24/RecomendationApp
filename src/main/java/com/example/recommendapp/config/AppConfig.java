@@ -11,10 +11,8 @@ public class AppConfig {
     public FirebaseDatabase databaseReference() {
         return FirebaseDatabase.getInstance();
     }
-
     @Bean
     public FirebaseAuth firebaseAuth() {
         return FirebaseAuth.getInstance();
     }
-
 }
