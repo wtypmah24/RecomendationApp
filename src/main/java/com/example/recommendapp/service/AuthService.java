@@ -10,11 +10,21 @@ import com.google.firebase.auth.UserRecord;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for handling user authentication and registration using Firebase.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
     private final UserMapper mapper;
 
+    /**
+     * Registers a new user with the provided user data.
+     *
+     * @param candidate The user data transfer object containing user information.
+     * @return The response data transfer object with the registered user's information.
+     * @throws RuntimeException if the user already exists or if there is an error during registration.
+     */
     public UserResponseDto registerUser(UserRequestDto candidate) {
         candidateCheck(candidate);
         User user = mapper.userRequestDtoToUser(candidate);
@@ -37,6 +47,13 @@ public class AuthService {
         }
     }
 
+    /**
+     * Retrieves the username associated with the given email.
+     *
+     * @param email The email of the user.
+     * @return The username associated with the given email.
+     * @throws RuntimeException if there is an error retrieving the user information.
+     */
     public String getUserName(String email) {
         try {
             UserRecord userRecord = FirebaseAuth.getInstance().getUserByEmail(email);
@@ -46,6 +63,12 @@ public class AuthService {
         }
     }
 
+    /**
+     * Checks if a user with the given email exists.
+     *
+     * @param email The email of the user.
+     * @return {@code true} if the user exists, {@code false} otherwise.
+     */
     public boolean findUser(String email) {
         try {
             FirebaseAuth.getInstance().getUserByEmail(email);
@@ -55,6 +78,12 @@ public class AuthService {
         }
     }
 
+    /**
+     * Validates the candidate user data.
+     *
+     * @param candidate The user data transfer object containing user information.
+     * @throws RuntimeException if any required field is empty.
+     */
     private void candidateCheck(UserRequestDto candidate) {
         if (candidate.userName().isEmpty()) {
             throw new RuntimeException("User name cannot be empty!");

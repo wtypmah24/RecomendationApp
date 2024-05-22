@@ -16,7 +16,7 @@ import java.util.Set;
 public class Top10Scheduler {
     private final FirebaseDatabase firebaseDatabase;
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "@dally")
     public void deleteOutdatedRatings() throws IOException {
         DatabaseReference ratingRef = firebaseDatabase.getReference("userRatings");
 
@@ -28,7 +28,6 @@ public class Top10Scheduler {
                     allRatings.add(ratingSnapshot);
                 }
 
-                // Sort ratings by score in descending order and get the top 10
                 allRatings.sort((a, b) -> {
                     Long scoreA = a.child("score").getValue(Long.class);
                     Long scoreB = b.child("score").getValue(Long.class);
@@ -40,7 +39,6 @@ public class Top10Scheduler {
                     top10Keys.add(allRatings.get(i).getKey());
                 }
 
-                // Delete all ratings not in the top 10
                 for (DataSnapshot ratingSnapshot : allRatings) {
                     String ratingKey = ratingSnapshot.getKey();
                     if (!top10Keys.contains(ratingKey)) {

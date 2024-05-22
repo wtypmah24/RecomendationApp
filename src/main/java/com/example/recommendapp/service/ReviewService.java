@@ -9,6 +9,9 @@ import com.google.firebase.database.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for handling review-related operations.
+ */
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
@@ -17,7 +20,13 @@ public class ReviewService {
     private final FirebaseDatabase firebaseDatabase;
     private final AuthService authService;
 
-
+    /**
+     * Adds a new review to the database.
+     *
+     * @param reviewRequestDto The data transfer object containing review information.
+     * @return The response data transfer object with the added review's information.
+     * @throws RuntimeException if the user does not exist.
+     */
     public ReviewResponseDto addReview(ReviewRequestDto reviewRequestDto) {
 
         DatabaseReference usersRef = firebaseDatabase.getReference("reviews");
@@ -38,6 +47,12 @@ public class ReviewService {
         return mapper.reviewToReviewResponseDto(review);
     }
 
+    /**
+     * Updates the score for the user being reviewed.
+     *
+     * @param review The review containing the score to be added.
+     * @throws RuntimeException if there is an error updating the score in the database.
+     */
     private void updateScore(Review review) {
         DatabaseReference userRatingRef = firebaseDatabase.getReference("userRatings").child(getViewedUserName(review));
         userRatingRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -67,10 +82,22 @@ public class ReviewService {
         });
     }
 
+    /**
+     * Checks if the users associated with the review request exist.
+     *
+     * @param requestDto The review request data transfer object.
+     * @return {@code true} if both users exist, {@code false} otherwise.
+     */
     private boolean isUserExist(ReviewRequestDto requestDto) {
         return authService.findUser(requestDto.viewerEmail()) && authService.findUser(requestDto.viewedEmail());
     }
 
+    /**
+     * Retrieves the username of the user being reviewed.
+     *
+     * @param review The review containing the user's email.
+     * @return The username of the user being reviewed.
+     */
     private String getViewedUserName(Review review) {
         String viewedEmail = review.getViewedEmail();
         return authService.getUserName(viewedEmail);

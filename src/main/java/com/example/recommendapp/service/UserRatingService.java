@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Service for handling operations related to user ratings.
+ */
 @Service
 @RequiredArgsConstructor
 public class UserRatingService {
@@ -18,18 +21,39 @@ public class UserRatingService {
     private final UserRatingMapper mapper;
     private final FirebaseDatabase firebaseDatabase;
 
+    /**
+     * Retrieves all user ratings from the database.
+     *
+     * @return A CompletableFuture containing a list of UserRatingResponseDto.
+     */
     public CompletableFuture<List<UserRatingResponseDto>> findAll() {
         return queryRatings(firebaseDatabase.getReference("userRatings"));
     }
 
+    /**
+     * Retrieves the top 10 user ratings from the database, ordered by score.
+     *
+     * @return A CompletableFuture containing a list of UserRatingResponseDto.
+     */
     public CompletableFuture<List<UserRatingResponseDto>> getTop10() {
         return queryRatings(firebaseDatabase.getReference("userRatings").orderByChild("score").limitToLast(10));
     }
 
+    /**
+     * Retrieves all user ratings from the database, ordered by score.
+     *
+     * @return A CompletableFuture containing a list of UserRatingResponseDto.
+     */
     public CompletableFuture<List<UserRatingResponseDto>> getOrdered() {
         return queryRatings(firebaseDatabase.getReference("userRatings").orderByChild("score"));
     }
 
+    /**
+     * Queries the database for user ratings based on the provided query.
+     *
+     * @param query The Firebase query to execute.
+     * @return A CompletableFuture containing a list of UserRatingResponseDto.
+     */
     private CompletableFuture<List<UserRatingResponseDto>> queryRatings(Query query) {
         CompletableFuture<List<UserRatingResponseDto>> future = new CompletableFuture<>();
         query.addListenerForSingleValueEvent(new ValueEventListener() {
